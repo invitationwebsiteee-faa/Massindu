@@ -26,8 +26,8 @@ function go(n) {
   });
   if (current === 6 && n !== 6) vid.pause();       // musik kembali lewat event "pause" video
   if (current === 8 && n !== 8) setTimeout(resetGame, 800);   // hentikan game saat keluar
-  if (n === MAIN) setTimeout(() => setStage(1), 900);          // halaman surat: foto pertama muncul otomatis
-  if (current === MAIN && n !== MAIN) setTimeout(() => setStage(0), 800);
+  if (STAGED.includes(n)) setTimeout(() => setStage(n, 1), 900);   // item pertama muncul otomatis
+  if (STAGED.includes(current) && n !== current) { const old = current; setTimeout(() => setStage(old, 0), 800); }
   current = n;
 }
 document.addEventListener('click', (e) => {
@@ -131,22 +131,37 @@ $('#env').onclick = () => $('#env').classList.toggle('open');
 // ===== SCROLL / SWIPE / KEYBOARD =====
 let busy = false;
 
-// Halaman surat: tiap scroll memunculkan 1 foto, lalu suratnya (tanpa pindah halaman)
-const shots = [...document.querySelectorAll('.strip img')];
-const LAST_STAGE = shots.length + 1;               // 3 foto + 1 surat = 4 tahap
-let stage = 0;
-function setStage(n) {
-  stage = n;
-  shots.forEach((img, i) => img.classList.toggle('show', i < n));
-  $('#letterBox').classList.toggle('show', n >= LAST_STAGE);
+// Halaman berjenjang (5 = kolase, 7 = surat): tiap scroll memunculkan 1 item, setelah item terakhir baru lanjut
+const STAGED = [5, 7];
+const stage = {};                                  // tahap tiap halaman
+const stepsOf = (n) => [...document.querySelectorAll(`#p${n} .step`)];
+function setStage(n, s) {
+  stage[n] = s;
+  stepsOf(n).forEach((el, i) => el.classList.toggle('show', i < s));
+  scrollFlow(n, s);
+}
+// Geser isi ke atas kalau lebih tinggi dari layar, supaya item terbaru selalu terlihat
+function scrollFlow(n, s) {
+  const flow = $(`#p${n} .flow`), el = stepsOf(n)[Math.max(0, s - 1)];
+  const H = flow.offsetParent.clientHeight, top = 16, bottom = 72;
+  const top0 = flow.offsetTop, h = flow.offsetHeight;
+  let t = 0;
+  if (s > 0 && h > H - top - bottom) {
+    const want = (H - bottom) - (top0 + el.offsetTop + el.offsetHeight);   // bawah item terbaru sejajar batas bawah
+    t = Math.min(top - top0, Math.max(want, (H - bottom) - (top0 + h)));
+  }
+  flow.firstElementChild.style.transform = `translateY(${t}px)`;
 }
 
 function step(dir) {
   if (busy) return;
-  if (current === MAIN && (dir > 0 || stage > 1)) {   // di halaman surat: scroll = munculkan / sembunyikan
-    const next = stage + dir;
-    if (next >= 1 && next <= LAST_STAGE) { busy = true; setTimeout(() => (busy = false), 600); setStage(next); }
-    return;
+  if (STAGED.includes(current)) {                  // scroll dulu memunculkan / menyembunyikan item
+    const s = stage[current] || 0, total = stepsOf(current).length;
+    if ((dir > 0 && s < total) || (dir < 0 && s > 1)) {
+      busy = true; setTimeout(() => (busy = false), 600);
+      setStage(current, s + dir);
+      return;
+    }
   }
   const n = current + dir;
   if (busy || current > MAIN || n < (unlocked ? 2 : 1) || n > MAIN) return;
@@ -168,44 +183,90 @@ addEventListener('keydown', (e) => {
   if (['ArrowDown', 'PageDown'].includes(e.key)) step(1);
   if (['ArrowUp', 'PageUp'].includes(e.key)) step(-1);
 });
-// ===== MINI GAME: TANGKAP HATI =====
-const arena = $('#arena'), info = $('#gameInfo'), startBtn = $('#gameStart');
-let score = 0, timeLeft = 0, spawner, timer;
-const status = () => (info.textContent = `Skor: ${score}  |  Waktu: ${timeLeft}`);
+// ===== MINI GAME: TANGKAP HATI PAKAI KERANJANG =====
+const arena = $('#arena'), basket = $('#basket'), info = $('#gameInfo'), startBtn = $('#gameStart');
+const GAME_SECONDS = 15;                           // lama permainan
+let score = 0, timeLeft = 0, playing = false, hearts = [], lastT = 0, spawnIn = 0, basketX = 0, raf;
+const status = () => (info.textContent = `Skor: ${score}  |  Waktu: ${Math.ceil(timeLeft)}`);
 
-function startGame() {
-  score = 0; timeLeft = 15;
-  arena.innerHTML = '';
-  startBtn.hidden = true;
-  status();
-  spawner = setInterval(spawnHeart, 600);
-  timer = setInterval(() => { timeLeft--; status(); if (timeLeft <= 0) endGame(); }, 1000);
+// Keranjang: ikut jari / mouse, atau tombol panah kiri-kanan
+function moveBasket(x) {                           // x = posisi tengah keranjang di dalam arena
+  const half = basket.offsetWidth / 2;
+  basketX = Math.max(half, Math.min(arena.clientWidth - half, x));
+  basket.style.left = basketX + 'px';
 }
+const pointerX = (e) => e.clientX - arena.getBoundingClientRect().left;
+arena.addEventListener('pointerdown', (e) => moveBasket(pointerX(e)));
+arena.addEventListener('pointermove', (e) => moveBasket(pointerX(e)));
+addEventListener('keydown', (e) => {
+  if (current !== 8) return;
+  if (e.key === 'ArrowLeft') moveBasket(basketX - 30);
+  if (e.key === 'ArrowRight') moveBasket(basketX + 30);
+});
+
+function clearHearts() { hearts.forEach((h) => h.el.remove()); hearts = []; }
 function spawnHeart() {
-  const h = document.createElement('button');
-  h.className = 'heart';
-  h.textContent = ['🤎', '🧡', '💛'][Math.floor(Math.random() * 3)];
-  h.style.left = Math.random() * 85 + '%';
-  h.style.top = Math.random() * 80 + '%';
-  h.onclick = () => { score++; status(); h.remove(); };
-  arena.append(h);
-  setTimeout(() => h.remove(), 1200);
+  const el = document.createElement('span');
+  el.className = 'heart';
+  el.textContent = ['🤎', '🧡', '💛'][Math.floor(Math.random() * 3)];
+  arena.append(el);
+  hearts.push({
+    el,
+    x: Math.random() * (arena.clientWidth - el.offsetWidth),
+    y: -el.offsetHeight,
+    v: 110 + Math.random() * 90,                   // kecepatan jatuh (px/detik), ubah untuk lebih cepat / lambat
+  });
+}
+function loop(t) {
+  if (!playing) return;
+  const dt = Math.min((t - lastT) / 1000, 0.05);   // selisih waktu antar frame (detik)
+  lastT = t;
+  timeLeft -= dt;
+  spawnIn -= dt;
+  if (spawnIn <= 0) { spawnHeart(); spawnIn = 0.55 + Math.random() * 0.35; }   // jeda antar hati
+
+  const catchY = basket.offsetTop + basket.offsetHeight * 0.25;   // garis mulut keranjang
+  const half = basket.offsetWidth / 2 + 6;
+  hearts = hearts.filter((h) => {
+    h.y += h.v * dt;
+    h.el.style.transform = `translate(${h.x}px, ${h.y}px)`;
+    const bottom = h.y + h.el.offsetHeight, cx = h.x + h.el.offsetWidth / 2;
+    if (bottom >= catchY && h.y < catchY + basket.offsetHeight * 0.5 && Math.abs(cx - basketX) < half) {
+      score++; h.el.remove(); return false;        // masuk keranjang
+    }
+    if (h.y > arena.clientHeight) { h.el.remove(); return false; }   // terlewat
+    return true;
+  });
+  status();
+  if (timeLeft <= 0) return endGame();
+  raf = requestAnimationFrame(loop);
+}
+function startGame() {
+  clearHearts();
+  score = 0; timeLeft = GAME_SECONDS; spawnIn = 0; playing = true;
+  startBtn.hidden = true;
+  moveBasket(arena.clientWidth / 2);
+  status();
+  lastT = performance.now();
+  raf = requestAnimationFrame(loop);
 }
 function endGame() {
-  clearInterval(spawner); clearInterval(timer);
-  arena.innerHTML = '';
-  info.textContent = score >= 12 ? `Skor ${score}! Hebat banget 🎉` : `Skor ${score}. Coba lagi yuk!`;
+  playing = false; cancelAnimationFrame(raf);
+  clearHearts();
+  info.textContent = score >= 10 ? `Skor ${score}! Hebat banget 🎉` : `Skor ${score}. Coba lagi yuk!`;
   startBtn.textContent = 'MAIN LAGI';
   startBtn.hidden = false;
 }
 function resetGame() {
-  clearInterval(spawner); clearInterval(timer);
-  arena.innerHTML = '';
-  info.textContent = 'Tap hati sebanyak mungkin dalam 15 detik';
+  playing = false; cancelAnimationFrame(raf);
+  clearHearts();
+  moveBasket(arena.clientWidth / 2);
+  info.textContent = 'Geser keranjang untuk menangkap hati yang jatuh';
   startBtn.textContent = 'MULAI';
   startBtn.hidden = false;
 }
 startBtn.onclick = startGame;
+moveBasket(arena.clientWidth / 2);
 
 // ===== KADO: HARUS DIBUKA SEMUA SEBELUM LANJUT =====
 const opened = new Set();

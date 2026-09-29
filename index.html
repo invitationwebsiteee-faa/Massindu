@@ -55,12 +55,11 @@
 
   <!-- 5. KOLASE FOTO -->
   <section class="page red" id="p5">
-    <h2>Happy birthday, <span class="name">Mas Ndu❤️</span></h2>
-    <div class="collage">
-      <figure class="photo" style="--r:5deg"><img src="asset/1.jpg" alt=""></figure>
-      <figure class="photo" style="--r:-3deg"><img src="asset/foto 2.jpg" alt=""><span class="stick">⭐</span></figure>
-      <p class="paper">Sehat dan panjang umur ya sayang. Wish You All The Best💝🎈</p>
-    </div>
+    <div class="flow"><div class="track">
+      <h2>Happy birthday, <span class="name">Mas Ndu❤️</span></h2>
+      <figure class="photo step" style="--r:-3deg"><img src="asset/foto 2.jpg" alt=""></figure>
+      <figure class="photo step" style="--r:3deg"><img src="asset/1.jpg" alt=""><span class="stick">⭐</span><p class="paper">Sehat dan panjang umur ya sayang. Wish You All The Best💝🎈</p></figure>
+    </div></div>
     <button class="btn corner" data-go="6">NEXT</button>
   </section>
 
@@ -73,10 +72,11 @@
 
   <!-- 7. SURAT -->
   <section class="page red" id="p7">
-    <div class="strip">
-      <img src="asset/polaroid 2.jpg" alt=""><img src="asset/poraroid 1.jpg" alt=""><img src="asset/foto 3.jpg" alt="">
-    </div>
-    <div id="letterBox">   <!-- surat muncul terakhir, setelah 3 foto -->
+    <div class="flow"><div class="track">
+    <img class="snap step" src="asset/polaroid 2.jpg" alt="">
+    <img class="snap step" src="asset/poraroid 1.jpg" alt="">
+    <img class="snap step" src="asset/foto 3.jpg" alt="">
+    <div id="letterBox" class="step">   <!-- surat muncul terakhir, setelah 3 foto -->
     <div class="env" id="env">
       <div class="letter"><p>Selamat bertambah usia sayang. Semoga dengan bertambahnya umur maka bertambah juga kebahagiaan dan segala hal baik dalam hidupmu.
         Mencintaimu adalah part terindah dalam hidupku, terimakasih sudah bertahan hingga detik ini. Semoga niat baikmu segera terkabul,
@@ -86,14 +86,15 @@
     </div>
     <p class="hint">tap amplopnya</p>
     </div>
+    </div></div>
     <button class="btn corner" data-go="1">BACK</button>
   </section>
 
   <!-- 8. MINI GAME (dari kado 2) -->
   <section class="page red" id="p8">
     <h2>Tangkap hatinya!</h2>
-    <p id="gameInfo">Tap hati sebanyak mungkin dalam 15 detik</p>
-    <div class="arena" id="arena"></div>
+    <p id="gameInfo">Geser keranjang untuk menangkap hati yang jatuh</p>
+    <div class="arena" id="arena"><span class="basket" id="basket">🧺</span></div>
     <button class="btn" id="gameStart">MULAI</button>
     <button class="btn corner" data-go="3">BACK</button>
   </section>

@@ -223,34 +223,65 @@ h2 { font-size: clamp(1.6rem, 6vw, 2.6rem); }
 }
 .out .candle::before { display: none; }
 
-/* Halaman 5: kolase */
-.collage {
-  position: relative;
+/* Halaman 5 & 7: polaroid disusun ke bawah, muncul memudar satu per satu saat di-scroll
+   (class .show diatur script.js; .track bergeser naik kalau isinya lebih tinggi dari layar) */
+.flow  { position: relative; }
+.track {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 260px;
+  gap: .8rem;
+  width: min(80vw, 320px);
+  transition: transform .8s cubic-bezier(.65, 0, .35, 1);
 }
-.collage .photo + .photo {
-  margin-top: 1.5rem;
-  margin-left: -2.5rem;
+.step {
+  opacity: 0;
+  translate: 0 24px;
+  scale: .92;
+  transition: opacity .9s, translate .9s, scale .9s;
+  pointer-events: none;
 }
-.collage .photo { padding-bottom: 3.6rem; }   /* polaroid lebih tinggi ke bawah (ubah angka ini untuk lebih panjang/pendek) */
+.step.show { opacity: 1; translate: 0 0; scale: 1; pointer-events: auto; }
+
+/* Ukuran polaroid (menyesuaikan lebar & tinggi layar) */
+.flow .photo,
+.snap {
+  width: min(50vw, 200px, 27vh);
+  width: min(50vw, 200px, 27dvh);
+}
+.flow .photo { padding-bottom: 3rem; }   /* bagian bawah polaroid lebih panjang */
+.snap {
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: .4rem solid var(--paper);
+  border-bottom-width: 1.3rem;
+  box-shadow: var(--shadow);
+  background: var(--tan);
+}
+/* Zig-zag kiri-kanan, menumpuk sedikit */
+.flow .photo:nth-of-type(odd),  .snap:nth-of-type(odd)  { align-self: flex-start; }
+.flow .photo:nth-of-type(even), .snap:nth-of-type(even) { align-self: flex-end; }
+.flow .photo + .photo, .snap + .snap { margin-top: -2rem; }
+.snap:nth-of-type(1) { rotate: -4deg; }
+.snap:nth-of-type(2) { rotate: 2deg; }
+.snap:nth-of-type(3) { rotate: -2deg; }
+
 .stick {
   position: absolute;
   top: -.8rem;
   right: -.8rem;
   font-size: 2rem;
 }
-.paper {
+.paper {                        /* tulisan di polaroid paling bawah */
   position: absolute;
-  bottom: -1.2rem;
+  bottom: .3rem;
   left: 50%;
-  width: 210px;
-  padding: .4rem;
+  z-index: 2;
+  width: 112%;
+  padding: .3rem;
   background: #efe2c8;
   color: #6b4226;
-  font-size: .7rem;
+  font-size: .72rem;
   transform: translateX(-50%) rotate(-3deg);
 }
 
@@ -267,37 +298,13 @@ h2 { font-size: clamp(1.6rem, 6vw, 2.6rem); }
   background: #000;
 }
 
-/* Halaman 7: surat & amplop */
-/* Foto surat: muncul memudar satu per satu saat di-scroll (class .show diatur script.js) */
-.strip {
-  display: flex;
-  justify-content: center;
-  gap: .6rem;
-}
-.strip img {
-  width: min(27vw, 130px);       /* ukuran tiap foto */
-  border: .4rem solid var(--paper);
-  border-bottom-width: 1.3rem;
-  box-shadow: var(--shadow);
-  opacity: 0;
-  translate: 0 24px;
-  scale: .92;
-  transition: opacity .9s, translate .9s, scale .9s;
-}
-.strip img:nth-child(1) { rotate: -4deg; }
-.strip img:nth-child(2) { rotate: 2deg; }
-.strip img:nth-child(3) { rotate: -2deg; }
-.strip img.show { opacity: 1; translate: 0 0; scale: 1; }
-
-/* Surat muncul memudar setelah foto ketiga */
+/* Halaman 7: surat & amplop (foto memakai .track / .snap di atas) */
 #letterBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
 }
-#p7 > #letterBox:not(.show) { opacity: 0; translate: 0 28px; pointer-events: none; }
-#p7 #letterBox { transition-delay: 0s; }
 .env {
   position: relative;
   width: 260px;
@@ -344,24 +351,34 @@ h2 { font-size: clamp(1.6rem, 6vw, 2.6rem); }
 .env.open .flap   { transform: rotateX(180deg); z-index: 0; }
 .env.open .letter { transform: translateY(-130px); height: 240px; z-index: 4; }
 
-/* Halaman 8: mini game */
+/* Halaman 8: mini game tangkap hati pakai keranjang */
 .arena {
   position: relative;
   width: min(90vw, 420px);
-  height: min(45vh, 320px);
+  height: min(52vh, 380px);
+  height: min(52dvh, 380px);
   overflow: hidden;
+  touch-action: none;             /* geser jari di arena = gerakkan keranjang, bukan scroll halaman */
   border: 2px dashed var(--tan);
   border-radius: 14px;
 }
-.heart {
+.basket {
   position: absolute;
-  border: 0;
-  background: none;
-  font-size: 2.2rem;
-  cursor: pointer;
-  animation: appear .2s;
+  bottom: .2rem;
+  left: 50%;
+  font-size: 2.8rem;
+  line-height: 1;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
-@keyframes appear { from { scale: 0; } }
+.heart {                        /* posisi diatur script.js saat jatuh */
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 2.2rem;
+  line-height: 1;
+  pointer-events: none;
+}
 
 /* Kado 3: balon berisi foto (keluar dari kotak saat diklik) */
 .sky {
@@ -470,8 +487,6 @@ h2 { font-size: clamp(1.6rem, 6vw, 2.6rem); }
   .emoji { font-size: 3rem; }
   #p1 { gap: 1rem; }
   #p1 .photo { width: min(42vw, 150px); }
-  .collage { min-height: 210px; }
-  .collage .photo { width: min(42vw, 170px); }
   .env { margin-top: 110px; width: min(80vw, 260px); }
 }
 
