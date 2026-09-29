@@ -1,0 +1,460 @@
+/* ==========================================================
+   DAFTAR ISI
+   1. Variabel warna   2. Reset & dasar   3. Halaman & transisi
+   4. Komponen umum    5. Per halaman     6. Animasi & aksesibilitas
+   ========================================================== */
+
+/* ---------- 1. VARIABEL WARNA (ganti di sini untuk ubah tema) ---------- */
+:root {
+  --brown:    #6f4a32;  /* latar halaman gelap (class .red) */
+  --caramel:  #b8763e;  /* teks di halaman krem */
+  --cream:    #f6ecdf;  /* latar halaman terang */
+  --tan:      #d9b08c;  /* aksen lembut */
+  --dark:     #2f1d12;  /* tombol */
+  --paper:    #fffaf3;  /* polaroid, strip foto, surat */
+
+  --cake-1:   #c9a27c;
+  --cake-2:   #ead5bb;
+  --candle:   #f3e3cf;
+  --flame:    #ffc93c;
+
+  --envelope:      #a86f42;
+  --envelope-dark: #94603a;
+
+  --shadow: 0 6px 18px #0005;
+  font-family: 'Fredoka', sans-serif;
+}
+
+/* ---------- 2. RESET & DASAR ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html, body {
+  overscroll-behavior: none;      /* cegah "tarik untuk refresh" di HP saat swipe ke bawah */
+}
+
+body {
+  background: #000;
+  overflow: hidden;
+}
+
+button { touch-action: manipulation; }   /* tap cepat tidak memicu zoom */
+
+h1 { font-size: clamp(2.4rem, 9vw, 4.5rem); }
+h2 { font-size: clamp(1.6rem, 6vw, 2.6rem); }
+
+.name  { font-family: 'Caveat', cursive; font-size: 1.2em; }
+.emoji { font-size: 4rem; }
+.hint  { opacity: .8; }
+
+/* ---------- 3. HALAMAN & TRANSISI ---------- */
+/* Semua halaman bertumpuk. Halaman aktif di tengah,
+   halaman sebelumnya di atas (.above), sisanya di bawah. */
+.page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  transform: translateY(100%);
+  visibility: hidden;
+  transition: transform .8s cubic-bezier(.65, 0, .35, 1), visibility 0s .8s;
+}
+.page.above  { transform: translateY(-100%); }
+.page.active { transform: none; visibility: visible; transition-delay: 0s; }
+
+/* Warna latar (nama .red dipertahankan supaya HTML tidak perlu diubah) */
+.red   { background: var(--brown); color: var(--cream); }
+.light { background: var(--cream); color: var(--caramel); }
+
+/* Isi halaman muncul bertahap setelah halaman aktif */
+.page > *                     { opacity: 0; translate: 0 28px; transition: opacity .6s .45s, translate .6s .45s; }
+.page.active > *              { opacity: 1; translate: 0 0; }
+.page.active > :nth-child(2)  { transition-delay: .6s; }
+.page.active > :nth-child(3)  { transition-delay: .75s; }
+.page.active > :nth-child(n+4){ transition-delay: .9s; }
+
+/* ---------- 4. KOMPONEN UMUM ---------- */
+/* Tombol */
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: .6rem 1.6rem;
+  background: var(--dark);
+  color: var(--cream);
+  font: inherit;
+  cursor: pointer;
+}
+.btn.corner {
+  position: absolute;
+  right: 1.2rem;
+  bottom: 1.2rem;
+}
+
+/* Tombol mute musik */
+.round {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--cream);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Foto polaroid (rotasi diatur lewat style="--r:..." di HTML) */
+.photo {
+  position: relative;
+  width: min(56vw, 230px);
+  padding: .5rem .5rem 1.6rem;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  transform: rotate(var(--r, 0));
+}
+.photo img,
+.strip img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--tan);
+}
+
+/* ---------- 5. PER HALAMAN ---------- */
+/* Halaman 1: passcode */
+#p1 {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: .6rem;
+  margin: .6rem 0;
+}
+.dots i {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 2px solid var(--cream);
+  border-radius: 6px;
+}
+.dots i.on { background: var(--cream); }
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, 3.2rem);
+  gap: .6rem;
+}
+.keys button {
+  height: 3.2rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--brown);
+  font: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.keys button:empty { visibility: hidden; }
+
+/* Halaman 3: kado */
+.gifts { display: flex; gap: 1rem; }
+.gift {
+  border: 0;
+  background: none;
+  font-size: clamp(3.5rem, 16vw, 6rem);
+  cursor: pointer;
+  transition: transform .2s;
+}
+.gift:hover { transform: scale(1.15) rotate(-6deg); }
+.gift.opened { opacity: .65; }   /* kado yang sudah dibuka */
+
+/* Halaman 4: kue & lilin */
+.cake {
+  position: relative;
+  width: 200px;
+  height: 190px;
+}
+.tier {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 14px 14px 8px 8px;
+}
+.t1 { bottom: 0;    width: 200px; height: 70px; background: var(--cake-1); }
+.t2 { bottom: 70px; width: 140px; height: 60px; background: var(--cake-2); }
+
+.candles {
+  position: absolute;
+  bottom: 130px;
+  left: 50%;
+  display: flex;
+  gap: 12px;
+  transform: translateX(-50%);
+}
+.candle {
+  position: relative;
+  width: 8px;
+  height: 34px;
+  border-radius: 2px;
+  background: var(--candle);
+}
+.candle::before {               /* api lilin */
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: -1px;
+  width: 10px;
+  height: 14px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--flame);
+  animation: flick .3s infinite alternate;
+}
+.out .candle::before { display: none; }
+
+/* Halaman 5: kolase */
+.collage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+.collage .photo + .photo {
+  margin-top: 1.5rem;
+  margin-left: -2.5rem;
+}
+.stick {
+  position: absolute;
+  top: -.8rem;
+  right: -.8rem;
+  font-size: 2rem;
+}
+.paper {
+  position: absolute;
+  bottom: -1.2rem;
+  left: 50%;
+  width: 210px;
+  padding: .4rem;
+  background: #efe2c8;
+  color: #6b4226;
+  font-size: .7rem;
+  transform: translateX(-50%) rotate(-3deg);
+}
+
+/* Halaman 6: video */
+#vid {
+  aspect-ratio: 9 / 16;           /* video vertikal */
+  height: min(68vh, 620px);
+  height: min(68dvh, 620px);      /* dvh = tinggi layar HP yang sebenarnya terlihat */
+  width: auto;
+  max-width: 90vw;
+  object-fit: cover;
+  border: 6px solid var(--cream);
+  border-radius: 10px;
+  background: #000;
+}
+
+/* Halaman 7: surat & amplop */
+.strip {                        /* strip foto sejajar ke samping, hemat tinggi layar */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78px;
+  gap: .4rem;
+  padding: .4rem;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  transform: rotate(-4deg);
+}
+.env {
+  position: relative;
+  width: 260px;
+  height: 170px;
+  margin-top: 120px;
+  border-radius: 6px;
+  background: var(--envelope);
+  cursor: pointer;
+}
+.letter {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  z-index: 1;
+  height: 150px;
+  padding: .8rem;
+  overflow: auto;
+  background: var(--paper);
+  color: #4a3222;
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  text-align: left;
+  transition: .6s;
+}
+.front {                        /* sisi depan amplop */
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--tan);
+  clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+.flap {                         /* tutup amplop */
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 3;
+  height: 90px;
+  background: var(--envelope-dark);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top;
+  transition: .4s;
+}
+.env.open .flap   { transform: rotateX(180deg); z-index: 0; }
+.env.open .letter { transform: translateY(-130px); height: 240px; z-index: 4; }
+
+/* Halaman 8: mini game */
+.arena {
+  position: relative;
+  width: min(90vw, 420px);
+  height: min(45vh, 320px);
+  overflow: hidden;
+  border: 2px dashed var(--tan);
+  border-radius: 14px;
+}
+.heart {
+  position: absolute;
+  border: 0;
+  background: none;
+  font-size: 2.2rem;
+  cursor: pointer;
+  animation: appear .2s;
+}
+@keyframes appear { from { scale: 0; } }
+
+/* Kado 3: balon berisi foto (keluar dari kotak saat diklik) */
+.sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.balloon {
+  position: absolute;
+  width: 90px;
+  height: 110px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  scale: .2;
+  opacity: 0;
+  transition: translate 1.8s cubic-bezier(.2, .8, .3, 1), scale .6s, opacity .5s;
+}
+.balloon.up   { scale: 1; opacity: 1; animation: sway 3s ease-in-out infinite alternate; }
+.balloon.zoom { scale: 2.6; z-index: 5; animation: none; }
+.balloon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 4px solid var(--c);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--tan);
+}
+.balloon span {                 /* tampil kalau foto tidak ketemu */
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 2rem;
+  border: 4px solid var(--c);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--tan);
+}
+.balloon::after {               /* tali balon */
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 2px;
+  height: 60px;
+  background: var(--dark);
+  opacity: .5;
+}
+
+/* ---------- 6. ANIMASI & AKSESIBILITAS ---------- */
+/* Salah kode passcode */
+.shake { animation: shake .4s; }
+@keyframes shake {
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* Api lilin berkedip */
+@keyframes flick {
+  to { transform: scale(.85) rotate(4deg); }
+}
+
+/* Konfeti */
+.fx {
+  position: fixed;
+  top: -2rem;
+  z-index: 9;
+  pointer-events: none;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(360deg); }
+}
+
+/* Efek klik tombol */
+.pop { animation: pop .25s; }
+@keyframes pop {
+  50% { scale: .85; }
+}
+
+/* Efek klik kado */
+.gift.picked { animation: openGift .9s forwards; }
+.gift.dim    { opacity: .25; transition: opacity .4s; }
+@keyframes openGift {
+  20%  { rotate: -12deg; }
+  40%  { rotate: 12deg; }
+  60%  { rotate: -8deg; }
+  100% { rotate: 0deg; scale: 1.6; opacity: 0; }
+}
+
+/* Kado 3 dibuka & balon bergoyang */
+.gift.wiggle { animation: wiggle .6s; }
+@keyframes wiggle {
+  25% { rotate: -14deg; }
+  50% { rotate: 14deg; }
+  75% { rotate: -8deg; }
+}
+@keyframes sway { to { rotate: 5deg; } }
+
+/* Layar kecil (HP): kecilkan jarak & foto supaya tidak terpotong */
+@media (max-width: 600px), (max-height: 700px) {
+  .page { gap: .6rem; padding: 1rem; }
+  .emoji { font-size: 3rem; }
+  #p1 { gap: 1rem; }
+  #p1 .photo { width: min(42vw, 150px); }
+  .collage { min-height: 210px; }
+  .collage .photo { width: min(42vw, 170px); }
+  .env { margin-top: 110px; width: min(80vw, 260px); }
+}
+
+/* Hormati pengaturan "kurangi gerakan" di perangkat */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy Birthday Sayang🎂</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Caveat&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Musik: ganti file di assets/music/song.mp3 -->
+  <audio id="bgm" src="asset/SnapTik.Net_7583688028611300626.mp3" loop></audio>
+  <button id="mute" class="round" hidden aria-label="Musik">🔊</button>
+
+  <!-- 1. PASSCODE -->
+  <section class="page red active" id="p1">
+    <figure class="photo" style="--r:-4deg"><img src="asset/depan.jpg" alt="Foto kita"></figure>
+    <div class="lock">
+      <p>Enter a passcode</p>
+      <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+      <div class="keys" id="keys"></div>
+    </div>
+  </section>
+
+  <!-- 2. HAPPY BIRTHDAY -->
+  <section class="page light" id="p2">
+    <h1>Selamat Bertambah Usia Sayang!</h1>
+    <div class="emoji">🎂🎁🧸</div>
+    <button class="btn corner" data-go="3">NEXT</button>
+  </section>
+
+  <!-- 3. GIFTS -->
+  <section class="page light" id="p3">
+    <h2>Gift for you</h2>
+    <div class="gifts">
+      <button class="gift" data-msg="Selamat ulang tahun, sayang! 🎉">🎁</button>  <!-- kado 1: ucapan (ubah di data-msg) -->
+      <button class="gift" data-go="8" data-msg="Kado 2: mini game 🎮">🎁</button>  <!-- kado 2: mini game -->
+      <button class="gift" data-balloons data-msg="Tap balonnya untuk melihat fotonya 🎈">🎁</button>  <!-- kado 3: balon berisi foto keluar dari kotak -->
+    </div>
+    <p id="giftHint">click any gift to open</p>
+    <div class="sky" id="sky"></div>   <!-- tempat balon muncul -->
+    <button class="btn corner" id="giftNext" data-go="4" hidden>NEXT</button>   <!-- muncul setelah 3 kado terbuka -->
+  </section>
+
+  <!-- 4. MAKE A WISH -->
+  <section class="page red" id="p4">
+    <h2 id="wishText">Make a wish</h2>
+    <div class="cake" id="cake">
+      <div class="candles"><i class="candle"></i><i class="candle"></i><i class="candle"></i><i class="candle"></i><i class="candle"></i></div>
+      <div class="tier t2"></div><div class="tier t1"></div>
+    </div>
+    <button class="btn" id="blow">BLOW</button>
+    <button class="btn corner" id="wishNext" data-go="5" hidden>NEXT</button>
+  </section>
+
+  <!-- 5. KOLASE FOTO -->
+  <section class="page red" id="p5">
+    <h2>Happy birthday, <span class="name">Mas Ndu</span></h2>
+    <div class="collage">
+      <figure class="photo" style="--r:5deg"><img src="asset/1.jpg" alt=""></figure>
+      <figure class="photo" style="--r:-3deg"><img src="asset/foto 2.jpg" alt=""><span class="stick">⭐</span></figure>
+      <p class="paper">Sehat dan panjang umur ya sayang. Wish You All The Best💝🎈</p>
+    </div>
+    <button class="btn corner" data-go="6">NEXT</button>
+  </section>
+
+  <!-- 6. VIDEO (beberapa detik) -->
+  <section class="page red" id="p6">
+    <h2>Beberapa detik Perjalanan Kita💕</h2>
+    <video id="vid" src="asset/WhatsApp Video 2026-09-29 at 13.00.28.mp4" poster="asset/cover.jpg" controls playsinline></video>
+    <button class="btn corner" data-go="7">NEXT</button>
+  </section>
+
+  <!-- 7. SURAT -->
+  <section class="page red" id="p7">
+    <div class="strip">
+      <img src="asset/polaroid 2.jpg" alt=""><img src="asset/poraroid 1.jpg" alt=""><img src="asset/foto 3.jpg" alt="">
+    </div>
+    <div class="env" id="env">
+      <div class="letter"><p>Selamat bertambah usia sayang. Semoga dengan bertambahnya umur maka bertambah juga kebahagiaan dan segala hal baik dalam hidupmu. Mencintaimu adalah part terindah dalam hidupku, terimakasih sudah bertahan hingga detik ini. Semoga niat baikmu segera terkabul, dilancar segala urusan baikmu dan selalu dalam lindungan-Nya. Jadi anak yang selalu berbakti kepada orang tua, bermanfaat bagi orang disekitarmu. Semoga selalu dicintai dan dikelilingi orang orang baik. Aaminn ❤</p></div>
+      <div class="flap"></div><div class="front"></div>
+    </div>
+    <p class="hint">tap amplopnya</p>
+    <button class="btn corner" data-go="1">BACK</button>
+  </section>
+
+  <!-- 8. MINI GAME (dari kado 2) -->
+  <section class="page red" id="p8">
+    <h2>Tangkap hatinya!</h2>
+    <p id="gameInfo">Tap hati sebanyak mungkin dalam 15 detik</p>
+    <div class="arena" id="arena"></div>
+    <button class="btn" id="gameStart">MULAI</button>
+    <button class="btn corner" data-go="3">BACK</button>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
