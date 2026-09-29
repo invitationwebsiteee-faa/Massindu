@@ -26,6 +26,8 @@ function go(n) {
   });
   if (current === 6 && n !== 6) vid.pause();       // musik kembali lewat event "pause" video
   if (current === 8 && n !== 8) setTimeout(resetGame, 800);   // hentikan game saat keluar
+  if (n === MAIN) setTimeout(() => setStage(1), 900);          // halaman surat: foto pertama muncul otomatis
+  if (current === MAIN && n !== MAIN) setTimeout(() => setStage(0), 800);
   current = n;
 }
 document.addEventListener('click', (e) => {
@@ -106,7 +108,7 @@ function press(k) {
 $('#blow').onclick = () => {
   blown = true;
   $('#cake').classList.add('out');
-  $('#wishText').textContent = 'happy birthday Sayang❤️';
+  $('#wishText').textContent = 'happy birthday sayanggg❤️';
   $('#blow').hidden = true;
   $('#wishNext').hidden = false;
   confetti();
@@ -128,7 +130,24 @@ $('#env').onclick = () => $('#env').classList.toggle('open');
 
 // ===== SCROLL / SWIPE / KEYBOARD =====
 let busy = false;
+
+// Halaman surat: tiap scroll memunculkan 1 foto, lalu suratnya (tanpa pindah halaman)
+const shots = [...document.querySelectorAll('.strip img')];
+const LAST_STAGE = shots.length + 1;               // 3 foto + 1 surat = 4 tahap
+let stage = 0;
+function setStage(n) {
+  stage = n;
+  shots.forEach((img, i) => img.classList.toggle('show', i < n));
+  $('#letterBox').classList.toggle('show', n >= LAST_STAGE);
+}
+
 function step(dir) {
+  if (busy) return;
+  if (current === MAIN && (dir > 0 || stage > 1)) {   // di halaman surat: scroll = munculkan / sembunyikan
+    const next = stage + dir;
+    if (next >= 1 && next <= LAST_STAGE) { busy = true; setTimeout(() => (busy = false), 600); setStage(next); }
+    return;
+  }
   const n = current + dir;
   if (busy || current > MAIN || n < (unlocked ? 2 : 1) || n > MAIN) return;
   if (dir > 0 && current === 3 && opened.size < 3) { setHint('Buka semua kado dulu ya 🎁'); nudge(); return; }

@@ -235,6 +235,7 @@ h2 { font-size: clamp(1.6rem, 6vw, 2.6rem); }
   margin-top: 1.5rem;
   margin-left: -2.5rem;
 }
+.collage .photo { padding-bottom: 3.6rem; }   /* polaroid lebih tinggi ke bawah (ubah angka ini untuk lebih panjang/pendek) */
 .stick {
   position: absolute;
   top: -.8rem;
@@ -267,16 +268,36 @@ h2 { font-size: clamp(1.6rem, 6vw, 2.6rem); }
 }
 
 /* Halaman 7: surat & amplop */
-.strip {                        /* strip foto sejajar ke samping, hemat tinggi layar */
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 78px;
-  gap: .4rem;
-  padding: .4rem;
-  background: var(--paper);
-  box-shadow: var(--shadow);
-  transform: rotate(-4deg);
+/* Foto surat: muncul memudar satu per satu saat di-scroll (class .show diatur script.js) */
+.strip {
+  display: flex;
+  justify-content: center;
+  gap: .6rem;
 }
+.strip img {
+  width: min(27vw, 130px);       /* ukuran tiap foto */
+  border: .4rem solid var(--paper);
+  border-bottom-width: 1.3rem;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  translate: 0 24px;
+  scale: .92;
+  transition: opacity .9s, translate .9s, scale .9s;
+}
+.strip img:nth-child(1) { rotate: -4deg; }
+.strip img:nth-child(2) { rotate: 2deg; }
+.strip img:nth-child(3) { rotate: -2deg; }
+.strip img.show { opacity: 1; translate: 0 0; scale: 1; }
+
+/* Surat muncul memudar setelah foto ketiga */
+#letterBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+#p7 > #letterBox:not(.show) { opacity: 0; translate: 0 28px; pointer-events: none; }
+#p7 #letterBox { transition-delay: 0s; }
 .env {
   position: relative;
   width: 260px;
